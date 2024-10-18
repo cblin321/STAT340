@@ -1,0 +1,304 @@
+---
+title: "Homework 3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T,eval=T,message=F,warning=F,fig.align='center')
+library(tidyverse)
+```
+
+## 1. Independence of Events <small>(8 points, 2 points each)</small>
+
+A fair four-sided die (numbered 1,2,3 and 4) is rolled three times. Consider the following three events:
+
+A: "The sum is 6 or less"
+
+B: "The second roll is more than the first"
+
+C: "The sum is odd"
+
+D: "Exactly two of the rolls are the same"
+
+a. Are A and B independent?
+
+$P(A \cap B) = P(A)P(B)$
+
+$|\Omega| = 64$
+
+Count $|sum \leq 6|$: 
+
+$P(sum = 1) = \{\}$
+
+$P(sum = 2) = \{\}$
+
+$(sum = 3) = \{1, 1, 1\}$
+
+$(sum = 4) = \{1, 1, 2\} = 3$, notice that $2$ can be placed in $2$ more positions.
+
+$(sum = 5) = \{\{1, 2, 2\}, \{3, 1, 1\}\} = 6$, has the same reasoning as $(sum = 4)$
+
+$(sum = 6) = \{\{1, 2, 3\}, \{4, 1, 1\}, \{2, 2, 2\}\} = 10$, we see that the last set of outcomes is entirely unique, ${4, 1, 1}$ has $3$ possible combinations, and we can just permute ${1, 2, 3}$ for $3!$ orderings.
+
+$P(A) = \frac{20}{64}$
+
+There are $4$ possible rolls for the 1st die:
+
+$1$: there will be $3$ for the second roll
+
+$2$: there will be $2$ for the second roll
+
+$3$: there will be $1$ for the second roll
+
+$4$: max roll
+
+Since there are $4$ outcomes for the 3rd roll,
+
+$P(B) = \frac{24}{64}$
+
+Evaluate $P(A \cap B)$: 
+
+$(sum = 3) = 0$
+
+$(sum = 4) = \{1, 1, 2\} = 1$
+
+$(sum = 5) = \{\{1, 2, 2\}, \{3, 1, 1\}\} = 2$
+
+$(sum = 6) = \{\{1, 2, 3\}, \{4, 1, 1\}\} = 4$, ${4, 1, 1}$ has $1$ possible combination, and ${1, 2, 3}$ will have $3$
+
+$P(A \cap B) = \frac{7}{64}$
+
+$\frac{20}{64} \frac{24}{64} \neq \frac{7}{64}$
+
+Events A and B are not independent.
+
+b. Are C and D independent?
+
+$P(C) = \frac{1}{2}$
+
+Evaluate $P(D)$: 
+
+Suppose we fix an outcome for an arbitrary roll, so there are $4$ outcomes, then we must have another roll equal to this arbitrary roll, there is only $1$ outcome, and one not equal, there are $3$ outcomes. Note that there is no specific order for these outcomes, so we can put the unique number in $3$ positions.
+
+$P(D) = \frac{4 * 3 * 3}{64} = \frac{9}{16}$
+
+
+Evaluate $P(C \cap D)$:
+
+This will be the case when the 3rd number is odd. 
+
+$P(C \cap D) = \frac{4 * 3 * 3}{128} = \frac{9}{32}$
+
+$\frac{1}{2} \frac{9}{16} = \frac{9}{32}$ 
+
+C and D are independent.
+
+c. Are A and C independent?
+
+$P(A) = \frac{20}{64}$
+
+$P(C) = \frac{1}{2}$
+
+Evaluate $P(A \cap C)$: 
+
+We must have: 
+
+$(sum = 3) = {1, 1, 1}$
+
+$(sum = 5) = \{\{1, 2, 2\}, \{3, 1, 1\}\} = 6$
+
+$P(A \cap C) = \frac{7}{64}$
+
+$P(A)P(C) = \frac{20}{128}$
+
+They are not independent.
+
+d. Are B and D independent?
+
+$P(B) = \frac{24}{64}$
+
+$P(D) = \frac{9}{16}$
+
+Evaluate $P(B \cap D)$: 
+
+$P(B \cap D) = \frac{12}{64}$
+
+$\frac{3}{8} \frac{9}{16} \neq \frac{3}{16}$
+
+They are not independent.
+
+## 2. Stock Portfolio <small>(8 points, 2 points each)</small>
+
+Consider two stocks. Stock A has a mean annual return of 0.05 and a standard deviation of 0.01. Stock B has a mean annual return of 0.10 and a standard deviation of 0.04. Past data suggests that the prices have a correlation of -0.65.
+You have \$1000 to invest in a portfolio composed of these two stocks. 
+
+a. Suppose you invest \$500 in stock A and \$500 in stock B. What will be the expected return and the standard deviation of your portfolio (in dollars)? 
+*Hint:* $SD(aX+bY) = \sqrt{Var(aX+bY)}= \sqrt{a^2Var(X)+2abCov(X,Y)+b^2Var(Y)}$ and $Cov(X,Y)=\sigma_X \sigma_Y \rho_{XY}$
+
+Find $Cov(X,Y)$
+
+```{r}
+cov = .01 * .04 * -.65
+cov
+```
+
+Find $SD(aX+bY)$
+
+```{r}
+sd = sqrt(500^2 * .01^2 + 2 * 500^2 * cov + 500^2 * .04^2)
+sd
+```
+
+Find expected return: 
+
+```{r}
+500 * .05 + .1 * 500
+```
+
+b. Give an expression for the standard deviation for a portfolio investing $\$x$ in stock A and $\$1000-x$ in stock B. 
+
+$SD(xA + (1000 - x)B) = \sqrt{Var(xA) + (1000 - x)^2B)} = \sqrt{x^2Var(A) + 2(x)(1000 - x)Cov(A, B) + (1000 - x)^2Var(B)}$
+
+$Cov(X,Y)=\sigma_X \sigma_Y \rho_{XY}$
+
+c. Find the value $x$ that minimizes this standard deviation. 
+
+We will find the derivative WRT x and set it to 0 to find a minimum: 
+
+$\frac{d}{dx} \sqrt{x^2Var(A) + 2(x)(1000 - x)Cov(A, B) + (1000 - x)^2Var(B)}$
+
+$\frac{1}{2 \sqrt{x^2Var(A) + 2x(1000 - x)Cov(A, B) + (1000 - x)^2Var(B) } } \frac{d}{dx} [x^2Var(A) + 2(x)(1000 - x)Cov(A, B) + (1000 - x)^2Var(B)] = 0$
+
+This is equivalent to solving: 
+
+$\frac{d}{dx} [x^2Var(A) + 2(x)(1000 - x)Cov(A, B) + (1000 - x)^2Var(B)] = 0$
+
+Expanding: 
+
+$\frac{d}{dx} [x^2Var(A) + 2000x - 2x^2 Cov(A, B) + (1000^2 - 2000x + x^2) Var(B)] = 0$
+
+
+$2xVar(A) + (2000 - 4x) Cov(A, B) + (-2000 + 2x) Var(B)] = 0$
+
+Simplify:
+
+$2x[Var(a) - 2Cov(A, B) - Var(b)] + 2000(Cov(A, B) - Var(B)) = 0$
+
+$2x[.0001 - 2( -0.00026) + .0016] + 2000(-0.00026 - .0016) = 0$
+
+
+$2x[.0001 - 2( -0.00026) + .0016] + 2000(-0.00026 - .0016) = 0$
+
+$0.00444x - 3.72 = 0$, $x \approx 837.837837838$
+
+d. What is the expected return and standard deviation (in dollars) for the portfolio split you chose in part c?
+
+Find $SD(aX+bY)$
+
+```{r}
+x = 3.72 / 0.00444
+sd = sqrt(x^2 * .01^2 + 2 * x *(1000 - x) * cov + (1000-x)^2 * .04^2)
+sd
+```
+
+Find expected return: 
+
+```{r}
+x * .05 + (1000 - x) * .1
+```
+
+## 3. Mousetrap: A Rube Goldberg Machine  <small>(5 points, 1 points each)</small>
+
+Consider the board game Mousetrap. When you trigger the trap, the ball needs to 
+
+1. roll down a **ramp**,
+2. be carried up by a **hammer**,
+3. roll  down another **ramp**,
+4. go down a bathtub **drain**,
+5. land on a **lever** which
+6. sends a diver into a **basin** which then
+7. causes the **trap** to descend.
+
+Suppose you can model the success of each component as independent Bernoulli random variables $X_1$ through $X_7$, where the probability of $X_i$ succeeding is $.94$ for each component. 
+
+a. What is the probability that the trap works correctly from beginning to end?
+
+```{r}
+.94^7
+```
+
+b. If you attempt the trap 15 times during a game, how many times do you expect it to work correctly from beginning to end?
+
+```{r}
+15 * .94^7
+```
+
+c. Suppose you let the marble go: Let $Y$ be the number of components of the trap that work in a row. If one component fails, then you stop counting. Calculate the probability mass function of $Y$. *Hints: $Y$ can have values $0, 1, 2, 3, 4, 5, 6$ or $7$. This is like a Geometric r.v. except it does not have infinite support. How can you use this fact to determine the pmf? Be careful: what is a 'success' in this context?*
+
+We find each value under 7 of the PMF to be:
+
+```{r}
+
+.94^(0:6) * .06
+
+```
+
+
+```{r}
+pmf = .94^(0:6) * .06
+pmf = append(pmf, .94^7)
+pmf
+sum(.94^(0:6) * .06) + .94^7
+```
+
+d. Calculate the expected value of $Y$ and its variance. 
+
+Expected value: 
+
+```{r}
+
+sum(pmf * 0:7)
+
+```
+
+
+e. What is $P(Y = 6 | Y \geq 3)$?
+
+$P(Y = 6 | Y \geq 3) = \frac{P(Y = 6 \text{ } \cap  \text{ }  Y \geq 3)}{P(Y \geq 3)}$
+
+
+```{r}
+(.94^6 * .06) / sum(pmf[4:length(pmf)])
+```
+
+
+
+
+
+## 4. Bayes Rule with forecasting <small>(9 points, 3 points each)</small>
+
+Madison, Wisconsin gets about 115 days of precipitation per year (we'll just call it rain for the remainder of this problem, even though it is often snow). On days when it ends up raining the forecast on Channel 3000 is correct (i.e. the morning forecast calls for rain) 93% of the time. On days where there is no rain the morning forecast correctly says there will be no rain 87% of the time. 
+
+a. Calculate the overall probability that a forecast on a randomly selected day is correct.
+
+```{r}
+(115 * .93) / 365 + (250 * .87) / 365
+```
+
+b. If the weather from day to day is independent and the forecast accuracy from day to day is independent, then how many correctly forecasted days do you expect in a 365 day year? 
+
+```{r}
+(115 * .93) + (250 * .87) 
+```
+
+
+c. If the forecast calls for rain, what is the likelihood that it actually rains? In other words, find $P(\text{Rain} | \text{Forecast Rain})$.
+
+$P(\text{Rain} | \text{Forecast Rain}) = \frac{P(\text{Rain } \cap \text{ Forecast Rain})}{P(\text{forecast rain})}$
+
+Rewrite as $P(R | FCR) = \frac{P(FCR | R)P(R)}{P(FCR | R)P(R) + P(FCR | \neg R)P(\neg R)}$, we evaluate this to be:
+
+```{r}
+(.93 * (115/365)) / (.93 * (115/365) + .13 * (250/365))
+
+```

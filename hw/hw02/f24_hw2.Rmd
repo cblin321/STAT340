@@ -1,0 +1,129 @@
+---
+title: "Homework 2"
+output: 
+  html_document:
+    self_contained: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T,eval=T,message=F,warning=F,fig.align='center')
+library(tidyverse)
+```
+
+
+## Problem 1 <small>(2pts each, 8pts total)</small>
+
+Here are a few probability exercises to get you warmed up.
+
+a. Consider $X\sim \text{Normal}(5, 2^2)$. Find $P(4 < X < 7)$
+
+```{r}
+pnorm(7, 5, 2) - pnorm(4, 5, 2) 
+```
+
+b. Suppose you have an uneven 6-sided die where the even numbers are equally likely to occur and the odd numbers are also equally likely. The expected value of the die is $3.3333$ (i.e. $\frac{10}{3})$. What is the probability of getting a 6?
+   (Hint: Let $p$ represent the probability of getting an even number, and represent the probability of the other numbers algebraically. Then derive an expression for the expected value, let it equal $\frac{10}{3}$, and solve. You can go back and check your work by plugging the result back into your original expressions and verify it works with R.)
+   
+   $$2p + 4p + 6p + o + 3o + 5o = \frac{10}{3} = 12p + 9o$$ 
+   $$36p + 27o = 10$$
+   Notice we can represent $o$ with the expression $\frac{1 - 3p}{3}$, now substitute:
+   $$36p + 9(1 - 3p) = 10$$
+   Simplify:
+   $$9p = 1$$
+   There will be a $\frac{1}{9}$ chance of any even number, including 6.
+
+c. Give **two examples** of pairs of events that are mutually exclusive and explain why for each.
+
+Consider the trial of flipping a 2 sided coin a single time.
+Mutually exclusive events are: trial results in heads, the same trial results in tails. 
+A coinflip is binary, it must land on one side so the probability of both happening at the same time is 0.
+
+Rolling a 1 on a fair 6 sided dice, rolling a 2 on a fair 6 sided dice.
+A dice roll comes from a uniform discrete distribution, you can get only one outcome for a single dice roll.  
+
+d. Give **two examples** of pairs of events that are independent and explain why for each.
+
+Flipping a coin and getting heads $E_1$, flipping another coin and getting heads $E_2$. The outcomes are $\{\{H, T\}. \{T, H\}, \{H, H\}, \{T, T\}\}$. $P[E_1 \cap E_2] = \frac{1}{4}$, $P[E_1] = \frac{1}{2}$, $P[E_2] = \frac{1}{2}$, $P[E_1] \cdot P[E_2] = \frac{1}{4}$. We have $P[E_1 \cap E_2] = P[E_1]P[E_2]$.
+
+Rolling a fair 6 sided die and getting an even number $E_1$, rolling another fair 6 sided die and getting an odd number $E_2$. The outcomes are $\{\{E, E\}. \{E, O\}, \{O, O\}, \{O, E\}\}$. $P[E_1 \cap E_2] = \frac{1}{4}$. $P[E_1] = \frac{1}{2}$, $P[E_2] = \frac{1}{2}$, $P[E_1] \cdot P[E_2] = \frac{1}{4}$. We have $P[E_1 \cap E_2] = P[E_1]P[E_2]$.
+
+
+
+## Problem 2 <small>(2pts each, 14pts total)</small>
+
+For each of the following scenarios, decide what random variable may be appropriate to use as a model, and explain your reasoning as well as any assumptions you make.
+
+a. The number of patients in an experimental drug trial that respond to treatment. 
+
+Binomial. Some percentage of patients will respond, and it is binary. 
+
+b. The number of red cars you observe driving through an intersection between 10am and 11am. 
+
+Poisson. There should be an average amount of cars that could represent $\lambda$. 
+
+c. What the second hand reads on the clock when you wake up from a long nap (approximately).
+
+Discrete uniform. Time is distributed uniformly and you have a the same chance to wake up at each second. 
+
+d. How many people you need to swipe right on Tinder before you get a match. 
+
+Geometric. This is the number of times you need to perform a Binomial trial before a match.
+
+e. The length of time between mosquito bites a camper experiences while on a hike. 
+
+Exponential. This is to model the time between events. 
+
+f. Whether the Eagles win the Superbowl this year.
+
+Bernoulli. Each year is a trial, and the Eagles have a given chance to win each year, but we are talking about only this year.
+
+g. The GPA of a randomly selected UW-Madison graduate.
+
+Normal. There should be a mean GPA and some amount of variability.
+
+## Problem 3 <small>(2pts each, 4pts total)</small>
+
+a. Consider the CDF given below for random variable $Y$ 
+```{r}
+plot(x=0:6, y=c(0, .3, .5, .6, .75, .8, 1), type="s", ylab="F(y)", xlab="y", main="cdf of Y")
+abline(h=seq(.1,.9,.1), lty=2, col="gray")
+```
+Express the pmf of $Y$ in the following R code (in other words, fill in the missing probabilities)
+
+```{r}
+y<- 1:6
+py <- c(.3, .2, .1, .15, .05, .2) ## edit this line
+barplot(height=py, names=y, main="pmf of Y")
+```
+
+
+
+b. Calculate $E[Y]$ for the variable $Y$ in part a.
+
+```{r}
+sum(y * py)
+```
+
+
+## Problem 4 <small>(2pts each, 4pts total)</small>
+
+Below you will find the plot of a probability density function for a random variable $X$.
+
+```{r, echo=FALSE}
+plot(x=c(0,1,2,3), y=c(0,.5,.5,0), type="l", ylab="density", xlab="x", main="pdf of X")
+```
+
+Using just geometry answer a and b:
+
+a. What is $Pr[X < 1]$?
+
+We see this will be the area of a triangle with $l = 1$, $h = .5$. 
+
+$$P[X < 1] = \frac{1}{2}^2$$
+
+b. What is $Pr[1.5 < X < 2.5]$
+
+ $$Pr[1.5 < X < 2.5] = P[1.5 < X < 2] + P[2 < X < 2.5] = P[1.5 < X < 2] + (P[2 < X < 3] - P[2.5 < X < 3])$$
+ $$P[1.5 < X < 2] = \frac{1}{4}, P[2 < X < 3] - P[2.5 < X < 3] = \frac{1}{4} - \frac{1}{16}$$
+ $$Pr[1.5 < X < 2.5] = \frac{7}{16}$$
+
