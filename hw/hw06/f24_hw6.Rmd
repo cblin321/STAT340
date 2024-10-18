@@ -27,32 +27,104 @@ tableOfPairs = function(vec){
 split = function(str) strsplit(str, split="")[[1]]
 
 flips1 = "HTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHT"
-reps = replicate(1e4, unname(tableOfPairs(rbinom(length(split(flips1)), 1, .5))[ "10"]))
+reps = replicate(1e3, unname(tableOfPairs(rbinom(length(split(flips1)), 1, .5))[ "10"]))
 num_pairs = unname(tableOfPairs(split(flips1))["HT"])
 mean(reps >= num_pairs)
 ```
 From our simulation we can see $p < \frac{1}{1000}$, of getting the same number of pairs from a fair distribution, so we reject the null and this coin is not fair.
 
+Recall the properties of a Binomial, we already have a binary fixed number of trials, but we must test for:
+
+Independence and success rate for each flip
 
 ```{r}
-#seems to have long sequences of H or T, sim from Binom(N, .5) using the running ratio as a test statistic
+#seems to have runs broken up frequently, investigate the average run length
+ratioFromTable = function(tb){
+  return(setNames((tb["HH"]/tb["HT"])/(tb["TT"]/tb["TH"]),"R"))
+}
+ratioFromTableBinom = function(tb){
+  return(setNames((tb["11"]/tb["10"])/(tb["00"]/tb["01"]),"R"))
+}
+avgRunLength = function(x) {
+  mean(rle(x)$lengths)
+}
+
+genFlip = function(n) {
+  rbinom(n, 1, .5)
+}
+
 flips2 = "HHHTHTTTHHTHHTHHHTTTTHTHTHHTTHTHHHTHHTHTTTHTHHHTHTTTHTHTHHTHTHTTHTHHTHTHTTTHTHHHTHTHTTHTHTHHTHTHTHHHTHTTTHTHHTHTHTHHTTTHTHHTHHTTTTHTHTHHHTHTTHTHHTHTHTTHTHHTHTHHHTHHHTHTTTHTTHTTTHTHHHTHTHTTHTHHTHHTHTTT"
 
-flips3 = "HHTHTHTTTHTHHHTHHTTTHTHHTHTTTHTHTHHTHTHTTHTHHHHHHTTTHTHTHHTHTTTHTHHTHTHTTTHTHHHTTHTTTHTHTHHHHTHTTHHTTTTTHTHHHTHTHTTTTTHHHTHHTHHTHHHTTTTHTHTHHHTHHTTTTTHTHHHTHTHTHTTTHTHHHTHTHTHTTHTHHTHTHTHTTTTHTHHHTHTH"
+reps = replicate(1e3, avgRunLength(rbinom(length(split(flips2)), 1, .5)))
+hist(reps)
+#appears there are no observed average run lengths that match coin 2
+runs = rle(split(flips2))$lengths
 
-flips4 = "HTHHHHHHHTHTTHHTTHHHTHTHTTTHHTHHHTHHTTHTTTTTTTTTHTHHTTTTTHTHTHTHHTTHTTHTTTTTHHHTHTTTHTHTHHHTHTTTTHTHTHHTTHTHTTHHTHTHHHHTHTTHHTTHTTHTTHTHHHHHHTTTTTTHHHTTHTHHHHTTTHTTHHHTTHTHHTTTHHTHHTTTHTHHTHHHTHHTTHHH"
-
-flips5 = "HHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTT"
-
-flips6 = "TTHTTTHTTTTTTTHTHTHTHTTHTTHTHHTHHTTTHHTHTTTHTHHTHHHTHTTHHTHHTTHTHTTTTHTHTTTHHTTTTTTTTHTHHTTHTTTTTTHTHTHTHTTTHTTHHTTHTTTHHTTTHTTHTTTTHTTTTHHTTTHTHTHHHTTTTTTHTHHTTTTTTTTTTTTHHHTTTHHHTTTHTTTHTHTTHTTTTTHT"
-
-# you can use the function below to split the above sequences in vectors of flips
+average_run_length = mean(runs)
+mean(average_run_length >= reps)
 
 
 ```
+From our simulation we can see $p < \frac{1}{1000}$ of getting a smaller average run length from a fair coinflip, so we reject the null and this is not a fair coin.
+```{r}
+flips3 = "HHTHTHTTTHTHHHTHHTTTHTHHTHTTTHTHTHHTHTHTTHTHHHHHHTTTHTHTHHTHTTTHTHHTHTHTTTHTHHHTTHTTTHTHTHHHHTHTTHHTTTTTHTHHHTHTHTTTTTHHHTHHTHHTHHHTTTTHTHTHHHTHHTTTTTHTHHHTHTHTHTTTHTHHHTHTHTHTTHTHHTHTHTHTTTTHTHHHTHTH"
+flips3 = split(flips3)
+reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips3)))))
+test_stat = ratioFromTable(tableOfPairs(flips3))
+mean(test_stat >= reps) 
+reps = replicate(1e3, avgRunLength(rbinom(length(flips3), 1, .5)))
+runs = rle(flips3)$lengths
+average_run_length = mean(runs)
+average_run_length
+mean(average_run_length >= reps)
+```
 
 
+```{r}
+flips4 = "HTHHHHHHHTHTTHHTTHHHTHTHTTTHHTHHHTHHTTHTTTTTTTTTHTHHTTTTTHTHTHTHHTTHTTHTTTTTHHHTHTTTHTHTHHHTHTTTTHTHTHHTTHTHTTHHTHTHHHHTHTTHHTTHTTHTTHTHHHHHHTTTTTTHHHTTHTHHHHTTTHTTHHHTTHTHHTTTHHTHHTTTHTHHTHHHTHHTTHHH"
+flips4 = split(flips4)
+reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips4)))))
+test_stat = ratioFromTable(tableOfPairs(flips4))
+test_stat
+mean(test_stat >= reps) 
+reps = replicate(1e3, avgRunLength(rbinom(length(flips4), 1, .5)))
+runs = rle(flips4)$lengths
+average_run_length = mean(runs)
+average_run_length
+mean(average_run_length >= reps)
+mean(flips4 == "H")
+```
 
+
+```{r}
+flips5 = "HHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTT"
+flips5 = split(flips5)
+reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips5)))))
+test_stat = ratioFromTable(tableOfPairs(flips5))
+test_stat
+mean(test_stat >= reps) 
+reps = replicate(1e3, avgRunLength(rbinom(length(flips5), 1, .5)))
+runs = rle(flips5)$lengths
+average_run_length = mean(runs)
+average_run_length
+mean(average_run_length <= reps)
+mean(flips5 == "H")
+```
+
+```{r}
+flips6 = "TTHTTTHTTTTTTTHTHTHTHTTHTTHTHHTHHTTTHHTHTTTHTHHTHHHTHTTHHTHHTTHTHTTTTHTHTTTHHTTTTTTTTHTHHTTHTTTTTTHTHTHTHTTTHTTHHTTHTTTHHTTTHTTHTTTTHTTTTHHTTTHTHTHHHTTTTTTHTHHTTTTTTTTTTTTHHHTTTHHHTTTHTTTHTHTTHTTTTTHT"
+flips6 = split(flips6)
+reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips6)))))
+test_stat = ratioFromTable(tableOfPairs(flips6))
+test_stat
+mean(test_stat >= reps) 
+reps = replicate(1e3, avgRunLength(rbinom(length(flips6), 1, .5)))
+runs = rle(flips6)$lengths
+average_run_length = mean(runs)
+average_run_length
+mean(average_run_length <= reps)
+mean(flips6 == "H")
+```
 ## Problem \#2: Finding the Trick Coin <small>(6 pts; 2pts each)</small>
 
 I have two coins in my pocket - a trick coin with two heads and a fair coin with one head and one tail(s?). We'll play a game. I will grab one coin at random, and flip it $N$ times. After that you will have to decide if it is the fair coin or the trick coin. The null hypothesis is that it is the fair coin. 
