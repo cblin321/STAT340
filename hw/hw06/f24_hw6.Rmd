@@ -19,8 +19,23 @@ My advice is **be creative** with the test statistics you come up with to elimin
 (2 bonus points available if you can find a single test that is powerful enough to reject all the fake sequences together in one step. Yes, at least one such possible test exists.)
 
 ```{r}
-flips1 = "HTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHT"
+#this is a sequence of HT/TH pairs, sim from a Bernoulli N times and see how many HT pairs exist in that
+#arbitrarily assign heads to 1 and tails to 0
+tableOfPairs = function(vec){
+  return(table(runner::runner(vec,k=2,f=paste,collapse="")[-1]))
+}
+split = function(str) strsplit(str, split="")[[1]]
 
+flips1 = "HTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHTHT"
+reps = replicate(1e4, unname(tableOfPairs(rbinom(length(split(flips1)), 1, .5))[ "10"]))
+num_pairs = unname(tableOfPairs(split(flips1))["HT"])
+mean(reps >= num_pairs)
+```
+From our simulation we can see $p < \frac{1}{1000}$, of getting the same number of pairs from a fair distribution, so we reject the null and this coin is not fair.
+
+
+```{r}
+#seems to have long sequences of H or T, sim from Binom(N, .5) using the running ratio as a test statistic
 flips2 = "HHHTHTTTHHTHHTHHHTTTTHTHTHHTTHTHHHTHHTHTTTHTHHHTHTTTHTHTHHTHTHTTHTHHTHTHTTTHTHHHTHTHTTHTHTHHTHTHTHHHTHTTTHTHHTHTHTHHTTTHTHHTHHTTTTHTHTHHHTHTTHTHHTHTHTTHTHHTHTHHHTHHHTHTTTHTTHTTTHTHHHTHTHTTHTHHTHHTHTTT"
 
 flips3 = "HHTHTHTTTHTHHHTHHTTTHTHHTHTTTHTHTHHTHTHTTHTHHHHHHTTTHTHTHHTHTTTHTHHTHTHTTTHTHHHTTHTTTHTHTHHHHTHTTHHTTTTTHTHHHTHTHTTTTTHHHTHHTHHTHHHTTTTHTHTHHHTHHTTTTTHTHHHTHTHTHTTTHTHHHTHTHTHTTHTHHTHTHTHTTTTHTHHHTHTH"
@@ -32,8 +47,8 @@ flips5 = "HHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHH
 flips6 = "TTHTTTHTTTTTTTHTHTHTHTTHTTHTHHTHHTTTHHTHTTTHTHHTHHHTHTTHHTHHTTHTHTTTTHTHTTTHHTTTTTTTTHTHHTTHTTTTTTHTHTHTHTTTHTTHHTTHTTTHHTTTHTTHTTTTHTTTTHHTTTHTHTHHHTTTTTTHTHHTTTTTTTTTTTTHHHTTTHHHTTTHTTTHTHTTHTTTTTHT"
 
 # you can use the function below to split the above sequences in vectors of flips
-split = function(str) strsplit(str, split="")[[1]]
-split(flips1)
+
+
 ```
 
 
@@ -55,7 +70,7 @@ d. Extra Credit (2 points): Suppose if you guess correct you win \$100 (and if y
 We sample $X_1, X_x,\ldots,X_n \overset{\text{iid}}\sim\text{Uniform}(0,m)$ where $m$ is an unknown maximum. Sleazy Jim tells you that $m=1$ but you're not so sure. The 50 values sampled are in the following data file:
 
 ```{r}
-X <- read.csv("uniform_sample.csv")$x
+X <- read.csv("./../../data/uniform_sample.csv")$x
 ```
 
 a. Write out in formal notation the null and alternative hypotheses. 
@@ -70,7 +85,7 @@ Have you been playing the hot new game Blurtle? It's a (fictional) word game you
 The file `blurtle.csv` contains 100 rows of data, giving the number of tries to guess the word. If it took 7 guesses that actually means I failed (you don't actually get a 7th guess). 
 
 ```{r}
-blurtle <- read.csv("blurtle.csv")
+blurtle <- read.csv("./../../data/blurtle.csv")
 ```
 
 Your task is to perform a permutation test on the data to determine if there is statistical evidence of a true improvement trend.
