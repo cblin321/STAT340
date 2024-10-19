@@ -19,7 +19,7 @@ My advice is **be creative** with the test statistics you come up with to elimin
 (2 bonus points available if you can find a single test that is powerful enough to reject all the fake sequences together in one step. Yes, at least one such possible test exists.)
 
 ```{r}
-#this is a sequence of HT/TH pairs, sim from a Bernoulli N times and see how many HT pairs exist in that
+#this is a sequence of HT/TH pairs, sim from a Bernoulli N times to generate a coinflip sample and see how many HT pairs exist in that
 #arbitrarily assign heads to 1 and tails to 0
 tableOfPairs = function(vec){
   return(table(runner::runner(vec,k=2,f=paste,collapse="")[-1]))
@@ -69,16 +69,16 @@ From our simulation we can see $p < \frac{1}{1000}$ of getting a smaller average
 ```{r}
 flips3 = "HHTHTHTTTHTHHHTHHTTTHTHHTHTTTHTHTHHTHTHTTHTHHHHHHTTTHTHTHHTHTTTHTHHTHTHTTTHTHHHTTHTTTHTHTHHHHTHTTHHTTTTTHTHHHTHTHTTTTTHHHTHHTHHTHHHTTTTHTHTHHHTHHTTTTTHTHHHTHTHTHTTTHTHHHTHTHTHTTHTHHTHTHTHTTTTHTHHHTHTH"
 flips3 = split(flips3)
-reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips3)))))
-test_stat = ratioFromTable(tableOfPairs(flips3))
-mean(test_stat >= reps) 
-reps = replicate(1e3, avgRunLength(rbinom(length(flips3), 1, .5)))
 runs = rle(flips3)$lengths
 average_run_length = mean(runs)
 average_run_length
+```
+This appears to be on the leftmost tail of our distribution of avg. run length, use a one-tailed test.
+```{r}
+reps = replicate(1e3, avgRunLength(rbinom(length(flips3), 1, .5)))
 mean(average_run_length >= reps)
 ```
-
+We reject the null that this sample is fair, there is statistically significant evidence ($p < .05$) flips are not independent.
 
 ```{r}
 flips4 = "HTHHHHHHHTHTTHHTTHHHTHTHTTTHHTHHHTHHTTHTTTTTTTTTHTHHTTTTTHTHTHTHHTTHTTHTTTTTHHHTHTTTHTHTHHHTHTTTTHTHTHHTTHTHTTHHTHTHHHHTHTTHHTTHTTHTTHTHHHHHHTTTTTTHHHTTHTHHHHTTTHTTHHHTTHTHHTTTHHTHHTTTHTHHTHHHTHHTTHHH"
@@ -92,39 +92,36 @@ runs = rle(flips4)$lengths
 average_run_length = mean(runs)
 average_run_length
 mean(average_run_length >= reps)
-mean(flips4 == "H")
 ```
+Try various test statistics, and they all appear to reflect a fair coin with $p > .05$ showing there is statistically significant evidence this is sampled from a binomial for each test.
+
 
 
 ```{r}
 flips5 = "HHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTTHHHHHHHHHHTTTTTTTTTT"
 flips5 = split(flips5)
-reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips5)))))
-test_stat = ratioFromTable(tableOfPairs(flips5))
-test_stat
-mean(test_stat >= reps) 
 reps = replicate(1e3, avgRunLength(rbinom(length(flips5), 1, .5)))
 runs = rle(flips5)$lengths
 average_run_length = mean(runs)
-average_run_length
 mean(average_run_length <= reps)
-mean(flips5 == "H")
 ```
+There is statistcially significant evidence ($p < .05$) this is not drawn from a binomial distribution.
 
 ```{r}
 flips6 = "TTHTTTHTTTTTTTHTHTHTHTTHTTHTHHTHHTTTHHTHTTTHTHHTHHHTHTTHHTHHTTHTHTTTTHTHTTTHHTTTTTTTTHTHHTTHTTTTTTHTHTHTHTTTHTTHHTTHTTTHHTTTHTTHTTTTHTTTTHHTTTHTHTHHHTTTTTTHTHHTTTTTTTTTTTTHHHTTTHHHTTTHTTTHTHTTHTTTTTHT"
 flips6 = split(flips6)
-reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips6)))))
 test_stat = ratioFromTable(tableOfPairs(flips6))
 test_stat
-mean(test_stat >= reps) 
-reps = replicate(1e3, avgRunLength(rbinom(length(flips6), 1, .5)))
-runs = rle(flips6)$lengths
-average_run_length = mean(runs)
-average_run_length
-mean(average_run_length <= reps)
-mean(flips6 == "H")
 ```
+Independent samples should be $\approx 1$, this is clearly on the left tail so we will do a one-sided test.
+
+```{r}
+reps = replicate(1e3, ratioFromTableBinom(tableOfPairs(genFlip(length(flips6)))))
+mean(test_stat >= reps) 
+```
+Since there is statistically significant evidence this sample doesn't have independent flips ($p < .05$) we conclude this is not a fair coin.
+
+
 ## Problem \#2: Finding the Trick Coin <small>(6 pts; 2pts each)</small>
 
 I have two coins in my pocket - a trick coin with two heads and a fair coin with one head and one tail(s?). We'll play a game. I will grab one coin at random, and flip it $N$ times. After that you will have to decide if it is the fair coin or the trick coin. The null hypothesis is that it is the fair coin. 
@@ -132,10 +129,40 @@ I have two coins in my pocket - a trick coin with two heads and a fair coin with
 **Decision Rule 1**: If after $N$ flips there are no tails, then you decide it is the trick coin. If there is at least 1 tail then you know it is the fair coin. 
 
 a. Using "Decision Rule 1", what is the lowest number of flips $N$ would you need in order to have a significance level less than 5% for this test?
+
+$$.5^N = .05$$
+
+$$N = \frac{log(.05)}{log(.5)} \approx 4.32$$
+
+There will be a minimum of $5$ flips.
+
 b. Using $N$ from part a, what is the power of the test?
+
+To have a true positive we get $N = 5$ heads in a row. However, the only time $H_0$ is false is if we picked the trick coin, so there is a $1$ probability of getting $5$ heads in a row. 
+
+$$P(\text{reject } H_0 | H_0 \text{ false}) = 1$$
+
 c. Suppose $N=4$ is decided. How can you modify the decision process to have a significance level of exactly 5%? Does this change the power of the test?
+
+The significance level is given by $\alpha = P(\text{reject } H_0 | H_0 \text{ true})$
+
+Using decision rule 1: $P(\text{reject } H_0 | H_0 \text{ true}) = .5^4 = \frac{1}{16}$
+
+$$\frac{1}{16} \cdot \frac{4}{5} = \frac{1}{20}$$
+
+Revised decision rule: if after N flips there are no tails, roll a fair 5-sided die, if the die lands between 1-4, decide it's the trick coin. Otherwise if it lands on 5, decide it's the fair coin. 
+
+Using the new decision rule, $P(\text{reject } H_0 | H_0 \text{ false}) = 1 * \frac{4}{5} \neq 1$
+
 d. Extra Credit (2 points): Suppose if you guess correct you win \$100 (and if you're wrong you get nothing), but each flip of the coin costs \$10. What strategy would you use to maximize your expected profit from this game?
 
+Expected profit per round can be modeled as $100 * P(\text{True Positive} | H_0 \text{ True}) - 10 * f$ or $100 * P(\text{True Negative} | H_0 \text{ False} - 10 * f)$ given that there is a 50-50 chance of $H_0$ being true or false:
+
+$p = \frac{100 * P(\text{True Positive}) - 10 * f}{2} + \frac{100 * P(\text{True Negative}) - 10 * f}{2} = 50[P(\text{True Positive}) +  P(\text{True Negative})] - 10f$
+
+We can now write $P(\text{True Positive})$ and $P(\text{True Negative})$ as a function of $f$:
+
+$$$$
 
 ## Problem \#3: Testing the maximum of a uniform distribution <small>(8 pts; 2 pts each)</small>
 
@@ -143,12 +170,37 @@ We sample $X_1, X_x,\ldots,X_n \overset{\text{iid}}\sim\text{Uniform}(0,m)$ wher
 
 ```{r}
 X <- read.csv("./../../data/uniform_sample.csv")$x
+X
 ```
 
 a. Write out in formal notation the null and alternative hypotheses. 
+$$H_0: X_1, X_x,\ldots,X_n \overset{\text{iid}}\sim\text{Uniform}(0,1)$$
+$$H_A: X_1, X_x,\ldots,X_n \overset{\text{iid}}\sim \text{Uniform}(0,m), m < 1$$
 b. Come up with a test statistic and measure your sampled data. Is this a one-sided test or two-sided test?
+
+We will use the mean of the distribution as a test.
+
+```{r}
+mean(X)
+```
+
+Since the mean is < 1 and there are no values in the distribution > 1 we will use a one-sided test on the left tail of the simulated distribution.
+
 c. Simulate a distribution for the test statistic under the null hypothesis of size at least 1000. Display a histogram of your test statistic distribution.
+
+```{r}
+reps = replicate(1e3, mean(runif(length(X), min=0, max=1)))
+hist(reps)
+
+```
+
 d. Calculate the $p$-value for this data and make a conclusion.
+
+```{r}
+mean(mean(X) >= reps)
+```
+
+Since we have $p < .05$ we reject the null hypothesis and conclude $H_A: X_1, X_x,\ldots,X_n \overset{\text{iid}}\sim \text{Uniform}(0,m), m<1$
 
 ## Problem \#4: Blurtle <small>(10 pts; 2 pt each)</small>
 
@@ -163,9 +215,43 @@ blurtle <- read.csv("./../../data/blurtle.csv")
 Your task is to perform a permutation test on the data to determine if there is statistical evidence of a true improvement trend.
 
 a. State the null and alternative hypotheses
+$$H_0: \text{The number of attempts on any given day is random}$$
+$$H_A: \text{The number of attempts follows a downward trend}$$
 b. Determine a test statistic that identifies a trend in the number of tries. There are many good ones you could use - be creative.
+
+Find the average sequential differences in each day. I.e.$X = \{x_1, x_i, \cdots, x_m\}$ use $\frac{\sum_{i = 2}^m x_i - x_{i - 1}}{m - 1}$
+
 c. Decide whether the test will be a one or two-tailed test
+
+The test will be one-tailed on the left tail since we want to see if a downward trend exists in the data.
+```{r}
+blurtle_tries = unlist(blurtle$tries)
+plot(blurtle$day, blurtle_tries, type = "l")
+avg_seq_diff = function(v) {
+  total = 0
+  for (i in 2:length(v)) {
+    total = total + v[i] - v[i - 1]
+  }
+  total / (length(v) - 1)
+}
+
+
+
+
+```
+
 d. Simulate a distribution of test statistics under the null hypothesis
+
+```{r}
+reps = replicate(1e3, avg_seq_diff(sample(blurtle_tries)))
+hist(reps)
+
+```
+
 e. Calculate the test statistic on the observed data, calculate the $p$-value and state your conclusions.
 
+```{r}
+mean(avg_seq_diff(blurtle_tries)>= reps)
+```
 
+Since we have $p > .05$ there is statistically significant that the null hypothesis hold, and that then number of tries required on a given day is random.
