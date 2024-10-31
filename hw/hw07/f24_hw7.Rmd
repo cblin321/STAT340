@@ -127,10 +127,12 @@ hist(reps)
 c. Estimate the bias of this estimator. Is it biased? If it is biased how would you modify it so that you could create an unbiased estimator?
 
 ```{r}
-hist(abs(.15 - reps))
-mean(abs(.15 - reps))
+hist(.15 - reps)
+mean(.15 - reps)
 
 ```
+
+There is a negative bias, the distribution of the bias seems to indicate a left skew, so adding a term to cancel it would improve bias.
 
 
 
