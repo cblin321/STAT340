@@ -41,16 +41,96 @@ print(paste("smallest bias:", min(mean_bias)))
 ```
 
 b. Which quantile algorithm (4 through 9) has the smallest variance?
+
+```{r}
+set.seed(123) 
+starting_sample = runif(30, 0, 1)
+point_est = quantile(starting_sample, .95, type = 4)
+percentile = c()
+mean_var = c()
+for (type in 4:9) {
+  percentile = c()
+  for (i in 1:1e3) {
+    sample_data = runif(30, 0, 1)
+    point_est_mc = quantile(sample_data, .95, type = type, names = FALSE)
+    percentile = append(percentile, point_est_mc)
+  }
+  print(paste("variance for:", type))
+  print(var(percentile))
+  mean_var = append(mean_var, var(percentile))
+}
+print(paste("smallest var:", min(mean_var)))
+```
+
 c. Which method is best for estimating the 95th percentile from a uniform distribution? Justify your answer.
+
+The least biased estimator is 6, and the most consistent estimator is 6. From these statistics it seems plausible 6 is the most accurate and most consistent estimator, making it the best here for the uniform.
+
 d. What about if $X\sim N(\mu, \sigma^2)$? Would you prefer a different method for estimating the 95th percentile from a normal distribution? *Hint: repeat the same analysis for $N(0,1)$.*
 
+```{r}
+set.seed(123) 
+starting_sample = runif(30, 0, 1)
+point_est = quantile(starting_sample, .95, type = 4)
+percentile = c()
+mean_var = c()
+for (type in 4:9) {
+  percentile = c()
+  for (i in 1:1e3) {
+    sample_data = rnorm(30, 0, 1)
+    point_est_mc = quantile(sample_data, .95, type = type, names = FALSE)
+    percentile = append(percentile, point_est_mc)
+  }
+  print(paste("variance for:", type))
+  print(var(percentile))
+  mean_var = append(mean_var, var(percentile))
+}
+print(paste("smallest var:", min(mean_var)))
+```
+
+```{r}
+set.seed(123) 
+starting_sample = runif(30, 0, 1)
+point_est = quantile(starting_sample, .95, type = 4)
+mean_bias = c()
+for (type in 4:9) {
+  bias = c()
+  for (i in 1:1e3) {
+    sample_data = rnorm(30, 0, 1)
+    point_est_mc = quantile(sample_data, .95, type = type, names = FALSE)
+    bias = append(bias, abs(.95 - point_est_mc))
+  }
+  print(paste("bias for:", type))
+  print(mean(bias))
+  mean_bias = append(mean_bias, mean(bias))
+}
+print(paste("smallest bias:", min(mean_bias)))
+```
+
+We can see that 7 is the most consistent estimator and 4 is the least biased when estimating from the normal. Depending on the use case of the estimator, either is preferable over 6.
 
 ## Problem \#2: Estimating a Geometric $p$ <small>(6 pts; 2 pts each)</small>
 
 a. Use the method of moments to come up with an estimator for a geometric distributions parameter $p$. *Hint: Use the fact that if $X\sim Geom(p)$ then $EX=\frac{1-p}{p}*$. 
+
+$EX=\frac{1-p}{p} = \frac{1}{p} - 1$, then it's each to see that $(EX + 1)^{-1} = p$.
+
+
+
 b. Estimate the sampling distribution of this estimator when we sample $n=13$ values from from $Geom(.15)$. Show the histogram of the estimated sampling distribution.
+
+```{r}
+reps = replicate(1e4, 1 / (1 + mean(rgeom(13, .15))))
+hist(reps)
+```
+
 c. Estimate the bias of this estimator. Is it biased? If it is biased how would you modify it so that you could create an unbiased estimator?
 
+```{r}
+hist(abs(.15 - reps))
+mean(abs(.15 - reps))
+
+```
 
 
 
