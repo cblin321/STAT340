@@ -411,6 +411,7 @@ for (type in 4:9) {
 ## [1] 0.03187468</code></pre>
 <pre class="r"><code>print(paste(&quot;smallest bias:&quot;, min(mean_bias)))</code></pre>
 <pre><code>## [1] &quot;smallest bias: 0.0269157252223115&quot;</code></pre>
+<p>Type 6 has the smallest.</p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>Which quantile algorithm (4 through 9) has the smallest
 variance?</li>
@@ -445,6 +446,7 @@ for (type in 4:9) {
 ## [1] 0.001695616</code></pre>
 <pre class="r"><code>print(paste(&quot;smallest var:&quot;, min(mean_var)))</code></pre>
 <pre><code>## [1] &quot;smallest var: 0.00119839180090103&quot;</code></pre>
+<p>Type 6 has the smallest.</p>
 <ol start="3" style="list-style-type: lower-alpha">
 <li>Which method is best for estimating the 95th percentile from a
 uniform distribution? Justify your answer.</li>
@@ -528,8 +530,8 @@ estimator, either is preferable over 6.</p>
 geometric distributions parameter <span class="math inline">\(p\)</span>. *Hint: Use the fact that if <span class="math inline">\(X\sim Geom(p)\)</span> then <span class="math inline">\(EX=\frac{1-p}{p}*\)</span>.</li>
 </ol>
 <p><span class="math inline">\(EX=\frac{1-p}{p} = \frac{1}{p} -
-1\)</span>, then it’s each to see that <span class="math inline">\((EX +
-1)^{-1} = p\)</span>.</p>
+1\)</span>, then <span class="math inline">\((EX + 1)^{-1} =
+p\)</span>.</p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>Estimate the sampling distribution of this estimator when we sample
 <span class="math inline">\(n=13\)</span> values from from <span class="math inline">\(Geom(.15)\)</span>. Show the histogram of the
@@ -594,12 +596,40 @@ practice to be better than simply using <span class="math inline">\(\bar{X}\)</s
 each)</small></h2>
 <p>What would be the required sample size <span class="math inline">\(n\)</span> so that the standard error of <span class="math inline">\(\bar{X}\)</span> (i.e. <span class="math inline">\(SD(\bar{X})\)</span>) would be 2 (or just under 2)
 for the following populations:</p>
+<p><span class="math inline">\(Var(\bar{X}) = \frac{Var(X)}{n}\)</span>
+then <span class="math inline">\(SD(\bar{X}) =
+\sqrt{\frac{Var(X)}{n}}\)</span>.</p>
 <ol style="list-style-type: lower-alpha">
 <li><span class="math inline">\(Normal(1000, 10^2)\)</span></li>
+</ol>
+<p><span class="math display">\[\sqrt{\frac{Var(X)}{n}} \rightarrow
+\sqrt{\frac{10^2}{n}} &lt;= 2 \]</span></p>
+<p><span class="math display">\[10^2 &lt;= 4n, n &gt;= 25\]</span></p>
+<p>At least <span class="math inline">\(25\)</span> samples.</p>
+<ol start="2" style="list-style-type: lower-alpha">
 <li><span class="math inline">\(Pois(75)\)</span></li>
+</ol>
+<p><span class="math display">\[\sqrt{\frac{Var(X)}{n}} \rightarrow
+\sqrt{\frac{75}{n}} &lt;= 2 \]</span></p>
+<p><span class="math display">\[75 &lt;= 4n, n &gt;=
+\frac{75}{4}\]</span></p>
+<p>At least <span class="math inline">\(19\)</span> samples.</p>
+<ol start="3" style="list-style-type: lower-alpha">
 <li><span class="math inline">\(Binom(200, .35)\)</span></li>
+</ol>
+<p><span class="math display">\[\sqrt{\frac{Var(X)}{n}} \rightarrow
+\sqrt{\frac{200(.35)(.65)}{n}} &lt;= 2 \]</span></p>
+<p><span class="math display">\[45.5 &lt;= 4n, n &gt;=
+\frac{45.5}{4}\]</span></p>
+<p>At least <span class="math inline">\(12\)</span> samples.</p>
+<ol start="4" style="list-style-type: lower-alpha">
 <li><span class="math inline">\(exp(.05)\)</span></li>
 </ol>
+<p><span class="math display">\[\sqrt{\frac{Var(X)}{n}} \rightarrow
+\sqrt{\frac{20^2}{n}} &lt;= 2 \]</span></p>
+<p><span class="math display">\[400 &lt;= 4n, n &gt;=
+\frac{400}{4}\]</span></p>
+<p>At least 100 samples.</p>
 </div>
 
 

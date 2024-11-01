@@ -40,6 +40,8 @@ for (type in 4:9) {
 print(paste("smallest bias:", min(mean_bias)))
 ```
 
+Type 6 has the smallest.
+
 b. Which quantile algorithm (4 through 9) has the smallest variance?
 
 ```{r}
@@ -61,6 +63,8 @@ for (type in 4:9) {
 }
 print(paste("smallest var:", min(mean_var)))
 ```
+
+Type 6 has the smallest.
 
 c. Which method is best for estimating the 95th percentile from a uniform distribution? Justify your answer.
 
@@ -113,7 +117,7 @@ We can see that 7 is the most consistent estimator and 4 is the least biased whe
 
 a. Use the method of moments to come up with an estimator for a geometric distributions parameter $p$. *Hint: Use the fact that if $X\sim Geom(p)$ then $EX=\frac{1-p}{p}*$. 
 
-$EX=\frac{1-p}{p} = \frac{1}{p} - 1$, then it's each to see that $(EX + 1)^{-1} = p$.
+$EX=\frac{1-p}{p} = \frac{1}{p} - 1$, then $(EX + 1)^{-1} = p$.
 
 
 
@@ -167,10 +171,45 @@ We can, but we would have to have $b = 0$ notice that both estimators should pro
 
 What would be the required sample size $n$ so that the standard error of $\bar{X}$ (i.e. $SD(\bar{X})$) would be 2 (or just under 2) for the following populations:
 
+$Var(\bar{X}) = \frac{Var(X)}{n}$ then $SD(\bar{X}) = \sqrt{\frac{Var(X)}{n}}$.
+
 a. $Normal(1000, 10^2)$
+
+$$\sqrt{\frac{Var(X)}{n}} \rightarrow \sqrt{\frac{10^2}{n}} <= 2 $$
+
+
+$$10^2 <= 4n, n >= 25$$
+
+At least $25$ samples.
+
+
 b. $Pois(75)$
+
+$$\sqrt{\frac{Var(X)}{n}} \rightarrow \sqrt{\frac{75}{n}} <= 2 $$
+
+
+$$75 <= 4n, n >= \frac{75}{4}$$
+
+At least $19$ samples.
+
 c. $Binom(200, .35)$
+
+$$\sqrt{\frac{Var(X)}{n}} \rightarrow \sqrt{\frac{200(.35)(.65)}{n}} <= 2 $$
+
+
+$$45.5 <= 4n, n >= \frac{45.5}{4}$$
+
+At least $12$ samples.
+
+
 d. $exp(.05)$
+
+$$\sqrt{\frac{Var(X)}{n}} \rightarrow \sqrt{\frac{20^2}{n}} <= 2 $$
+
+
+$$400 <= 4n, n >= \frac{400}{4}$$
+
+At least 100 samples.
 
 
 
