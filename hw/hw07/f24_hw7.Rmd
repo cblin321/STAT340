@@ -141,9 +141,26 @@ There is a negative bias, the distribution of the bias seems to indicate a left 
 It is interesting that if $X\sim Pois(\lambda)$ that $EX=VarX=\lambda$. One could use either $\bar{X}$ or $S^2$ as an estimator of $\lambda$ perhaps. 
 
 a. Using $n=15$ and $\lambda=20$ for this problem, use MC simulation to estimate the sampling distribution of The estimator $\bar{X}$. Show its histogram. 
+
+```{r}
+reps = replicate(1e4, mean(rpois(15, 20)))
+hist(reps)
+```
+
 b. Repeat the same but this time use $S^2$. 
+
+```{r}
+reps = replicate(1e4, var(rpois(15, 20)))
+hist(reps)
+```
+
 c. Compare the two estimators. Would you prefer one over the other? Why?
+
+$\bar{X}$ is preferable since it isn't skewed like $S^2$, $S^2$ also has a much wider range, so the estimations from $S^2$ aren't as reliable.
+
 d. What about a linear combination of the two variables? Could you construct an estimator of $\lambda$ of the form $a\bar{X} + bS^2$ that would be better than using either of them by themselves? 
+
+We can, but we would have to have $b = 0$ notice that both estimators should produce $\lambda$, but due to the nonlinearity of $S^2$, its results are too varied in practice to be better than simply using $\bar{X}$.
 
 
 ## Problem \#4: The Standard Error of $\bar{X}$<small>(8 pts; 2 pts each)</small>
