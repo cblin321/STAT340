@@ -37,6 +37,8 @@ There are no strictly right or wrong answers, here, though there are certainly b
 mean(mule_kicks$deaths)
 ```
 
+Assuming this is a Poisson, $\bar{X} = \lambda$.
+
 ### Part b: constructing a CI <small>4pts</small>
 
 Using everything you know (Monte Carlo, CLT, etc.), construct a confidence interval for the rate parameter $\lambda$.
@@ -46,6 +48,8 @@ Explain in reasonable detail what you are doing and why you are constructing the
 reps = replicate(1e4, mean(rpois(length(mule_kicks$deaths), mean(mule_kicks$deaths))))
 quantile( reps, probs=c(0.025, 0.975) )
 ```
+
+First we use our estimator $\bar{X}$ for $\lambda$, then under that assumption we sample data from the Poisson and use our estimator on the sample data. This should now provide us a distribution of estimators that we can take the quantile of to find the confidence interval.  
 
 ### Part c: assessing a model <small>3pts</small>
 
@@ -57,22 +61,18 @@ Use any and all tools that you know to assess (either with code or simply in wor
 Once again, there are no strictly right or wrong answers here.
 Explain and defend your decisions and thought processes in a reasonable way and you will receive full credit.
 
-We will use a MC approach to compare the mean of observed distribution to samples from a real Poisson. By doing this we can find a p-value and statistical significance.
+We will use a MC approach to compare the mean of observed distribution to samples from a real Poisson. By doing this we can find a p-value and statistical significance to support the hypothesis that the Poisson is an appropriate distribution or not.
 
-The null hypothesis will be that the mean of the observed data can be the mean of the Poisson. 
+The null hypothesis will be that the mean of the observed data is the mean of the Poisson, meaning the original was a Poisson. 
 
 The alternate hypothesis will be that the mean of the observed data can't be the mean of the Poisson.
 
 ```{r}
 reps = replicate(1e4, mean(rpois(length(mule_kicks$deaths), mean(mule_kicks$deaths))))
 mean(mean(mule_kicks$deaths) >= reps)
-observed_variance <- var(mule_kicks$deaths)
-n_simulations <- 1e4  # Number of simulations
-simulated_variances <- replicate(n_simulations, var(rpois(length(mule_kicks$deaths), mean(mule_kicks$deaths))))
-
-# Step 3: Compare the observed variance to the simulated variances
-mean(simulated_variances >= observed_variance)
 ```
+
+We find that $p > .05$, so we accept the null hypothesis that the mean of the observed data is the mean of the Poisson which implies the data is sampled from a Poisson.
 
 
 ## Problem 2: A Confidence interval for the median (8 points)
@@ -89,7 +89,7 @@ a. First assume that the population is normally distributed. Come up with estima
 
 ```{r}
 mean(mysteryData)
-var(mysteryData)
+sd(mysteryData)
 ```
 
 b. Construct a 95\% confidence interval assuming the population is a normal distribution. Use the Monte Carlo Approach. Use 1000 Monte Carlo replicates.
@@ -111,61 +111,6 @@ d. Construct a 95\% confidence interval assuming the population is a uniform dis
 ```{r}
 reps = replicate(1e3, median(runif(length(mysteryData), ab[1], ab[2])))
 quantile( reps, probs=c(0.025, 0.975) )
-
-```
-
-```{r}
-
-# Estimate the sample mean and sample standard deviation
-sample_mean <- mean(mysteryData)
-sample_sd <- sd(mysteryData)
-
-# Display the results
-sample_mean  # Point estimate for population mean (mu)
-sample_sd    # Point estimate for population standard deviation (sigma)
-
-```
-
-```{r}
-# Number of Monte Carlo replicates
-n_simulations <- 1000
-
-# Simulate 1000 datasets and compute the sample medians
-simulated_medians <- replicate(n_simulations, median(rnorm(length(mysteryData), mean = sample_mean, sd = sample_sd)))
-
-# Calculate the 95% confidence interval (2.5th and 97.5th percentiles)
-ci_95 <- quantile(simulated_medians, c(0.025, 0.975))
-
-# Display the confidence interval
-ci_95
-
-```
-
-```{r}
-# Sample mean and sample standard deviation
-sample_mean <- mean(mysteryData)
-sample_sd <- sd(mysteryData)
-
-# Point estimates for the min and max of the uniform distribution using the method of moments
-a_hat <- sample_mean - sqrt(3) * sample_sd
-b_hat <- sample_mean + sqrt(3) * sample_sd
-
-# Display the point estimates for a and b
-a_hat  # Estimate for minimum a
-b_hat  # Estimate for maximum b
-
-
-```
-
-```{r}
-# Simulate 1000 datasets based on the uniform distribution with estimated a and b
-simulated_medians_uniform <- replicate(n_simulations, median(runif(length(mysteryData), min = a_hat, max = b_hat)))
-
-# Calculate the 95% confidence interval for the median (2.5th and 97.5th percentiles)
-ci_95_uniform <- quantile(simulated_medians_uniform, c(0.025, 0.975))
-
-# Display the confidence interval
-ci_95_uniform
 
 ```
 
@@ -195,6 +140,10 @@ Just explain clearly what you are doing and why!
 
 Want to find $n$ where $P(X >= 5) >= .99$, $X \sim Binom(.82, n)$.
 
+We can try different $n$ starting from $5$ until $P(X >= 5) >= .99$. 
+
+There is the assumption that our point estimate is accurate for $p$, so the observed data should be analyzed closely to see if this is appropriate. 
+
 ```{r}
 for (i in 5:1e2) {
   if (1 - pbinom(4, size = i, prob = 0.82) >= 0.99) {
@@ -204,6 +153,10 @@ for (i in 5:1e2) {
 }
 
 ```
+
+The batch size should be at least 10.
+
+
 
 ## Problem 4: Estimating Coverage Rate (6 points)
 
@@ -226,6 +179,8 @@ results <- data.frame(p, coverage)
 NMC1 <- 500
 NMC2 <- 500
 
+head(results)
+
 for(j in 1:nrow(results)){
   # pull out the value p from the results data frame
   p <- results$p[j]
@@ -234,18 +189,20 @@ for(j in 1:nrow(results)){
   contains <- rep(FALSE, NMC1)
   for(i in 1:NMC1){ #Construct NMC1 confidence intervals
     #generate some data initially from the geometric distribution
-
+    data = rgeom(12, p)
     #calculate the unbiased estimate of p
-    
+    p.hat = 1 / (1 + (12 / (12 - 1)) * mean(data))
     #Now you want to use your p.hat to generate NMC2 sets of data
     #Each time you want to calcualte an unbiased phat, and store it.
-    
+    data = rgeom(NMC2, p.hat)
     #Your Monte Carlo Confidence interval should be based on
     #appropriate sample quantiles
-    
+    ci = quantile(data, c(0.025, 0.975))
+    #print(ci)
     #Last, assign 'contains[i]' to be TRUE or FALSE based on 
     #whether p is >= than the lower bound AND <= the 
-    #upper bound. 
+    #upper bound.
+    contains[i] = p >= ci[1] && p <= ci[2]
   }
   results[j, "coverage"] <- mean(contains)
 }
@@ -254,3 +211,5 @@ abline(h=.95, lty=2)
 ```
 
 b. What do you observe? Does the coverage of MC intervals tend to be affected by the value of $p$? In what way?
+
+It seems to be stable for $p <= .5$, then we see the coverage decrease as $p$ increases. 
