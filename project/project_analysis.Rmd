@@ -1,0 +1,145 @@
+---
+title: "Global CO2 Emissions from Fossil Fuels"
+author: "Christopher Lin, Ziye Zhang, Sean Prahl, Riya Kore"
+output: html_document
+date: "2024-04-16"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Introduction
+> The goal of this project is to investigate the change in global $CO_2$ emissions from fossil fuels over the last century. The motivation for this project is the increasing concern over global warming and the role of human activity in contributing to the increase in greenhouse gases in the atmosphere. Before analysing the dataset, we will bring some question to the table. What is the trend of global $CO_2$ emissions from fossil fuels over the last century? Is there a significant increase in $CO_2$ emissions between the early 1900s and the early 2000s? What are the implications of these findings for global warming and the need to reduce $CO_2$ emissions? We will be using the Carbon Dioxide Information Analysis Center (CDIAC) dataset to answer these questions. The project focus on average total $CO_2$ emissions from fossil fuels across all nations from the early 1900s (1900-1920) to the early 2000s (2000-2020). We predict that there will be an increase in global $CO_2$ emissions based on the increase in development, industry, and population globally.
+
+## Background
+> The dataset we will be using is the "Fossil-Fuel $CO_2$ Emissions by Nation" dataset from the Carbon Dioxide Information Analysis Center (CDIAC), which is the primary climate-change data and information analysis center of the U.S. Department of Energy. The dataset contains the total $CO_2$ emissions from fossil fuels and cement production for 233 countries and regions. The data is available from 1751 to 2014. We will be using the data from 1900 to 2020. The dataset contains the following columns: Country, Year, Total, Gas Fuel, Liquid Fuel, Solid Fuel, Cement, Gas Flaring, and Per Capita. We will be focusing on the Total column, which represents the total $CO_2$ emissions from fossil fuels and cement production in million metric tons of carbon. The variables are :
+Year: the year of observation,
+Country: country name
+Total: total consumption of fuels
+Solid Fuel: solid fuel consumption
+Liquid Fuel: liquid fuel consumption
+Gas Fuel: gas fuel consumption
+Cement: cement production
+Gas Flaring: gas flaring
+Per Capita: per capita consumption of fuels
+Bunker fuels: bunker fuels consumption
+By using these data, we will be able to calculate trend of global $CO_2$ emissions from fossil fuels over the last century, which helps us to understand the impact of human activity on global warming.
+Some unsual observations in the dataset are that the total $CO_2$ emissions from fossil fuels and cement production are heavily right skewed, with a few countries producing significantly more $CO_2$ emissions than all other countries.
+The rest of the section will be divided into 4 parts: Data Wrangling, Visualization, Analysis, and Interpretation & Discussion, where we will clean the data, visualize the data, perform hypothesis testing, and interpret the results.
+
+
+## Data Wrangling
+
+We will consider the global average of total $CO_2$ emissions across all nations with non-zero total $CO_2$ emissions. These are split into 2 samples, from 1900-1920 and 2000-2020. 
+
+We say that the distribution of both time periods is modeled by the distributions $X_1 \sim F(\mu_1, \sigma_1)$ and $X_2\sim F(\mu_2, \sigma_2)$ for 1900-1920 and 2000-2020 respectively. Where F is some arbitrary distribution. This assumes all observations are independent.
+
+First find the mean and standard deviation for both samples. 
+
+```{r, echo=FALSE, include=FALSE}
+co2 = read_csv("../data/fossil-fuel-co2-emissions-by-nation.csv") %>% rename(country = Country, year = Year, total = Total) %>%  filter((year >= 1900 & year <= 1920) | (year >= 2000 & year <= 2020)) %>% mutate(time_period = case_when(year >= 1900 & year <= 1920 ~ "1900s", 
+  year >= 2000 & year <= 2020 ~ "2000s")) %>% filter(total > 0)
+
+```
+
+
+```{r echo=FALSE}
+summary = co2 %>% select(year, total, time_period) %>% group_by(time_period) %>% summarize(mu = mean(total, na.rm = T), sigma = sd(total, na.rm = T), n = n(), p95 = quantile(total, .95), q1 = quantile(total, .25), q2 = quantile(total, .5), q3 = quantile(total, .75))
+summary
+```
+
+The results seem promising, we find that $\bar{x_1} = 17329$ Metric Megatons (Mt) and $\bar{x_2} = 36861$Mt. This is over a $100\%$ increase in global average $CO_2$ emissions.
+
+We also find that $s_1 = 55212$ and $s_2 = 177273$. 
+
+## Visualization
+
+A line plot will give a better idea of the overall trend of global average $CO_2$ emissions.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+temp = read_csv("../data/fossil-fuel-co2-emissions-by-nation.csv") %>% rename(country = Country, year = Year, total = Total) %>% group_by(year) %>% summarize(total = mean(total, na.rm = T))
+temp %>%  ggplot(aes(year, total)) + geom_line() + ggtitle("Global Average CO2 Trend") + annotate('rect', xmin=1900, xmax=1920, ymin = 0, ymax = Inf, alpha=.2, fill='red') + annotate('rect', xmin=2000, xmax=2020, ymin = 0, ymax = Inf, alpha=.2, fill='blue')+ ylab("Metric Megatons of CO2")+xlab("Year")
+```
+
+The red region is 1900-1920 and the blue region is 2000-2020. The early 2000s not only have a higher magnitude of $CO2$ emissions, they seem to be increasing at a faster rate than the early 1900s.
+
+Visualize the distributions.
+
+```{r echo=FALSE}
+co2 %>% ggplot(aes(total)) + geom_histogram() + facet_wrap(vars(time_period)) + ggtitle("Distribution of Total CO2 Emissions ")+scale_x_continuous( labels = scales::comma)+
+  xlab('Metric Magatons of Carbon')+ylab('Density') + theme(panel.spacing = unit(2, "lines")) +  theme(panel.spacing = unit(2, "lines"))
+```
+
+The data is heavily right skewed, it seems that there are a few outliers with high emissions. 
+
+To identify the data that's causing the skew we use the IQR rule.
+
+```{r echo=FALSE}
+iqr_1900 = summary[1, "q3"] - summary[1, "q1"]
+iqr_2000 = summary[2, "q3"] - summary[2, "q1"]
+top_range_1900 = (summary[1, "q3"] %>% pull(q3) + 1.5 * iqr_1900) %>% pull(q3)
+top_range_2000 = (summary[2, "q3"] %>% pull(q3) + 1.5 * iqr_2000) %>% pull(q3)
+outliers = co2 %>% filter((time_period == "1900s" & total > top_range_1900) | (time_period == "2000s" & total > top_range_2000)) 
+print(outliers %>% distinct(country, time_period), n = Inf)
+```
+
+These are the countries that had an observation above $1.5 \cdot IQR + Q_3$ of their respective samples.
+
+For completeness we include the lower outliers.
+
+```{r echo=FALSE}
+iqr_1900 = summary[1, "q3"] - summary[1, "q1"]
+iqr_2000 = summary[2, "q3"] - summary[2, "q1"]
+low_range_1900 = (summary[1, "q1"]  - 1.5 * iqr_1900) %>% pull(q1)
+low_range_2000 = (summary[2, "q1"]  - 1.5 * iqr_2000) %>% pull(q1)
+outliers = co2 %>% filter((time_period == "1900s" & total < low_range_1900) | (time_period == "2000s" & total < low_range_2000)) 
+print(outliers %>% distinct(country, time_period), n = Inf)
+```
+
+Note there are none below above $Q_1 - 1.5 \cdot IQR$ since the $IQR$ is so wide due to the right skew.
+
+To better visualize, we apply a log transformation. This reduces the effect of the outliers on the visualization, thereby allowing us to see the distribution of the majority of the data. 
+
+```{r echo=FALSE}
+co2 %>% ggplot(aes(total)) + geom_histogram() + facet_wrap(vars(time_period)) + scale_x_continuous(trans='log10', labels = scales::comma) + ggtitle("Distribution of Total CO2 Emissions")+ 
+  xlab('Log base 10 Metric Megatons of Carbon')+ylab('Density')
+```
+
+Both samples seem to be roughly normal on a log scale. We will use a $T$ distribution to model it.
+
+## Analysis
+
+### Hypothesis Testing 
+
+Since they both appear roughly normal after log normalizing, we will proceed with hypothesis testing using a T-test.
+
+We are interested in determining whether the difference in average world $CO_2$ emissions from 1900-1920 and 2000-2020 is greater than 0. Thus the null hypothesis will be whether the difference in $CO_2$ emissions is less than or equal to 0.
+
+In other words, $H_A = \mu_1 - \mu_2 > 0$ and $H_0 = \mu_1 - \mu_2 \leq 0$.
+
+```{r echo=FALSE}
+per1 = co2 %>% filter(time_period == "1900s")
+per2 = co2 %>% filter(time_period == "2000s")
+t.test(per2 %>% pull(total), per1 %>% pull(total), alt = "greater", paired = F)
+```
+
+> The evidence (p = 2.748e-8, one-sided t-test, df = 4186.1) is consistent with there being an increase in average world $CO_2$ emissions from the early 1900s (1900-1920) to the early 2000s (2000-2020). 
+
+
+## Interpretation & Discussion
+
+> Our main goal was to investigate the change in global $CO_2$ emissions from fossil fuels over the last century, and asked if there was a significant increase in $CO_2$ emissions between the early 1900s and the early 2000s. We expected that there would be an increase in global $CO_2$ emissions based on the the increase in development, industry, and population globally. After comparing sample emissions from the early 1900s and early 2000s, we found significant evidence to reject our null hypothesis (p = 2.748e-8, one-sided t-test, df = 4186.1) that there the difference in mean $CO_2$ emissions is less than or equal to 0. This investigation provides strong evidence (p<.05) to suggest that there has been an increase in mean global $CO_2$ emissions from the early 1900s (1900-1920) to the early 2000s (2000-2020). This supports the claim that human activity is a contributing cause for the increase in greenhouse gases in the atmosphere, which has consequently warmed up the planet. 
+
+> It is important to note that due to the strong right skew on our initial distributions, we performed a log transformation to make achieve an approximately normal dataset. The non-transformed dataset had a few strong outliers who produced much more $CO_2$ emissions  than all other countries. In this scenario, it is common to perform a log transformation to create a more symmetric distribution. This worked successfully for us, as you can see by our plots above. It is critical to make note of the cause for this transformation, a few very large outliers. This means that there are few countries that dominate the $CO_2$ emissions output globally. These countries produce significantly more emissions than any of the others, which identifies them as some of the greatest threats to the health of the planet. 
+
+> With this dataset alone, there are a plethora of different directions we could further investigate. Firstly, it would be interesting to look at the outliers from our dataset, and perhaps we could see just how much $CO_2$ the outliers contribute vs all the other countries. It would also be interesting to repeat this investigation of global total $CO_2$ emissions by fossil fuels for each different fossil fuel source in the dataset to understand the more nuanced dynamics of how fossil fuel use and $CO_2$ emissions are changing. We may be able to understand which fuels are used most, which ones produce the most emissions, and which fuel sources are growing in rates of use. It would again be interesting to look at each country's individual mean $CO_2$ emissions to understand which countries are emitting the most $CO_2$ and if any have decreased their emissions. Each of these questions would be of strong interest with the onset of global warming and the push for less $CO_2$ emissions and renewable energy sources. Furthermore, If we wanted to provide potential support for the need to combat global warming and to better understand the long term effects of fossil fuel use on our planet, it may be informative to repeat this experiment but instead select a sample from the earliest time period in the dataset (roughly 1750s).
+
+> Outside of this dataset, the possibilites are endless. One question we strongly considered investigating was the relationship between $CO_2$ emissions and a country's level of development or GDP. We thought that better understanding the relationship between fossil fuel use, emissions, and a country's development or economy might provide insight into why countries are, or are not, cutting down on emissions and adopting renewable energy sources.  With renewable energy in mind, if we were to find a dataset that characterizes a country's renewable energy and fuel sources, we could investigate the change in emissions and also the change in renewable energy use across the same time period to see how the two may be related and may impact one another. This would likely be best performed with a dataset that contains information on energy production from different sources, rather than $CO_2$ emssions from those sources. Finally, since we are greatly interested in each countries $CO_2$ emissions, it would be incredibly useful if we had data about $CO_2$ emissions from sources outside of just fossil fuels. If we could also include $CO_2$ emissions from industry, farming, travel, deforestiaion, etc. there would be many more interesting questions to investigate about the amount of contribution from these various sources, and how much impact they have globally. 
+
+> Data Citation:
+Boden, T.A., G. Marland, and R.J. Andres. 2013. Global, Regional, and
+National Fossil-Fuel CO2 Emissions. Carbon Dioxide Information Analysis
+Center, Oak Ridge National Laboratory, U.S. Department of Energy, Oak Ridge,
+Tenn., U.S.A. doi 10.3334/CDIAC/00001_V2013
