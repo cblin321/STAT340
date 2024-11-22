@@ -64,6 +64,10 @@ plot(lm.mtcars,ask=F,which=1:2)
 Briefly inspect the residuals plot by running `plot(lm.mtcars,ask=F,which=1:2)`.
 What do you observe, and what does it mean?
 
+it seems there's a curvature in the residuals, meaning the data right not be represented by a linear relationship.
+
+The tails of the data seem to diverge from the line, indicating the residuals may not be normally distributed.
+
 ### c) Interpreting the model
 
 View the summary of your model by uncommenting and running the code below.
@@ -77,32 +81,47 @@ Choose hp.
 
 Keeping all other factors constant, a unit increase in hp will decrease the mpg of the car by 0.03177.
 
-THe standard error 
+Standard error of 0.00903 means if we keep drawing new samples of cars, the distribution of hp coefficients has standard deviation of 0.00903. 
 
 Be careful in your wording of the interpretation.
 
 Which coefficients are statistically significantly different from zero? How do you know?
 
-hp and wt are both statistically significant because they have p values under $.05$.
+hp, intercept, and wt are both statistically significant because they have p values under $.05$.
 
 ### d) Interpreting residuals
 
 What is the Residual Standard Error (RSE) for this model? How many degrees of freedom does it have?
 
+RSE is 2.593 on 29 DF.
+
 What is the value of $R^2$ for this model? (__Hint:__ look at the output of `summary`) Give an interpretation of this value.
+
+.8268, so the model could explain around 83% of the variance in the data. 
 
 ### e) Adjusted $R^2$
 
 Briefly read about the adjusted $R^2$ [here](https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/adjusted-r2/).
 What is the adjusted $R^2$ of this model and how does this differ from the usual $R^2$ value? (__Hint:__ again, look at the output of `summary`).
 
+The adjusted $R^2$ is .8148, meaning the model could explain around 81% of variance by adjusting for the number of predictors. 
 
 ### f) CIs for coefficients
 
 Read the documentation for the `confint` function, and use it to generate $95\%$ confidence intervals for the coefficients of your model.
 Give an interpretation of these confidence intervals.
 
+```{r}
+confint(lm.mtcars)
+```
 
+We are 95% confident that:
+
+The intercept for the model will be between 33.95738245 to 40.49715778.
+
+Holding wt constant, a unit increase in hp will decrease the MPG by between 0.05024078 to 0.01330512.
+
+Holding hp constant, a unit increase in wt will decrease the MPG by between -5.17191604 to -2.58374544.
 
 ## Problem 2) the `cats` data set (8 points; 2pt each)
 
@@ -119,24 +138,43 @@ head(cats)
 Create a scatter plot showing heart weight on the y-axis and body weight on the x-axis.
 Ignore the `Sex` variable in this plot.
 
+
+```{r}
+plot(cats$Bwt, cats$Hwt)
+```
+
 Briefly describe what you see. Is there a clear trend in the data?
 
+There seems to be a clear linear trend in the data. At least, these 2 variables are correlated.
 
 ### b) fitting a linear model
 
 Fit a linear regression model to predict cat heart weight from cat body weight (and using an intercept term, of course).
 
+```{r}
+lm.cats = lm(cats$Hwt ~ cats$Bwt)
+summary(lm.cats)
+```
+
 Examine the coefficients of your fitted model.
-What is the coefficient for the `Bwt` variable?
+What is the coefficient for the `Bwt` variable? 4.0341
+
 Interpret this coefficient-- a unit change in body weight yields how much change in heart weight?
 
+A unit change in body weight will result in a 4.0341 change in heart weight on average. 
 
 ### c) back to plotting
 
 Create the same plot from Part a above, but this time color the points in the scatter plot according to the `Sex` variable.
 You may use either `ggplot2` or the built-in R plotting tools, though I would recommend the former, for this.
 
+```{r}
+cats %>% ggplot(aes(x = Bwt, y = Hwt, color = Sex)) + geom_point() 
+```
+
 You should see a clear pattern. Describe it. A sentence or two is fine here.
+
+When $Bwt > 2.5$ the data appears to be dominated by males. It also appears the linear trend is more pronounced after this point. 
 
 ### d) adding `Sex` and an interaction
 
@@ -145,10 +183,20 @@ From looking at the data, it should be clear that the `Sex` variable has explana
 Fit a new linear regression model, still predicting heart weight, but this time including both body weight and sex as predictors *and* an interaction term between body weight and sex.
 Take note of how R assigns `Sex` a dummy encoding.
 
+```{r}
+lm.cats = lm(cats$Hwt ~ cats$Bwt + cats$Sex + cats$Bwt:cats$Sex)
+summary(lm.cats)
+```
+
 Examine the outputs of your model.
 In particular, note the coefficients of `Sex` and the interaction between `Bwt` and `Sex`.
 Are both of these coefficients statistically significantly different from zero?
+
+Yes they are both statistically significant with $p < .05$.
+
 How do you interpret the interaction term?
+
+If a cat is male then the coefficient for Bwt will increase by 1.6763.
 
 
 
