@@ -65,14 +65,14 @@ We will use a MC approach to compare the mean of observed distribution to sample
 
 The null hypothesis will be that the mean of the observed data is the mean of the Poisson, meaning the original was a Poisson. 
 
-The alternate hypothesis will be that the mean of the observed data can't be the mean of the Poisson.
+The alternate hypothesis will be that the data is not sampled from the Poisson.
 
 ```{r}
 reps = replicate(1e4, mean(rpois(length(mule_kicks$deaths), mean(mule_kicks$deaths))))
 mean(mean(mule_kicks$deaths) >= reps)
 ```
 
-We find that $p > .05$, so we accept the null hypothesis that the mean of the observed data is the mean of the Poisson which implies the data is sampled from a Poisson.
+We find that $p > .05$, so we reject the alternate hypothesis which implies the data is sampled from a Poisson.
 
 
 ## Problem 2: A Confidence interval for the median (8 points)

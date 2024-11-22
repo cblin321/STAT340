@@ -402,7 +402,7 @@ in this way (a few sentences is fine!).</p>
 <pre class="r"><code>reps = replicate(1e4, mean(rpois(length(mule_kicks$deaths), mean(mule_kicks$deaths))))
 quantile( reps, probs=c(0.025, 0.975) )</code></pre>
 <pre><code>##      2.5%     97.5% 
-## 0.6035714 0.7964286</code></pre>
+## 0.6035714 0.8000000</code></pre>
 <p>First we use our estimator <span class="math inline">\(\bar{X}\)</span> for <span class="math inline">\(\lambda\)</span>, then under that assumption we
 sample data from the Poisson and use our estimator on the sample data.
 This should now provide us a distribution of estimators that we can take
@@ -424,14 +424,13 @@ p-value and statistical significance to support the hypothesis that the
 Poisson is an appropriate distribution or not.</p>
 <p>The null hypothesis will be that the mean of the observed data is the
 mean of the Poisson, meaning the original was a Poisson.</p>
-<p>The alternate hypothesis will be that the mean of the observed data
-can’t be the mean of the Poisson.</p>
+<p>The alternate hypothesis will be that the data is not sampled from
+the Poisson.</p>
 <pre class="r"><code>reps = replicate(1e4, mean(rpois(length(mule_kicks$deaths), mean(mule_kicks$deaths))))
 mean(mean(mule_kicks$deaths) &gt;= reps)</code></pre>
-<pre><code>## [1] 0.5181</code></pre>
+<pre><code>## [1] 0.5134</code></pre>
 <p>We find that <span class="math inline">\(p &gt; .05\)</span>, so we
-accept the null hypothesis that the mean of the observed data is the
-mean of the Poisson which implies the data is sampled from a
+reject the alternate hypothesis which implies the data is sampled from a
 Poisson.</p>
 </div>
 </div>
@@ -460,7 +459,7 @@ replicates.</li>
 <pre class="r"><code>reps = replicate(1e3, median(rnorm(length(mysteryData), mean(mysteryData), sd(mysteryData))))
 quantile( reps, probs=c(0.025, 0.975) )</code></pre>
 <pre><code>##     2.5%    97.5% 
-## 15.12632 18.28111</code></pre>
+## 15.32076 18.32337</code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
 <li>Now assume that the population is uniformly distributed. Come up
 with estimates for the min and max of the uniform distribution using the
@@ -477,7 +476,7 @@ uniform distribution. Use 1000 Monte Carlo replicates.</li>
 <pre class="r"><code>reps = replicate(1e3, median(runif(length(mysteryData), ab[1], ab[2])))
 quantile( reps, probs=c(0.025, 0.975) )</code></pre>
 <pre><code>##     2.5%    97.5% 
-## 14.67092 18.71192</code></pre>
+## 14.66469 18.69800</code></pre>
 </div>
 <div id="problem-3-closing-the-loop-6-pts" class="section level2">
 <h2>Problem 3: Closing the loop <small>6 pts</small></h2>
