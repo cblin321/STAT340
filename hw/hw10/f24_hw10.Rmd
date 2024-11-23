@@ -192,7 +192,7 @@ Examine the outputs of your model.
 In particular, note the coefficients of `Sex` and the interaction between `Bwt` and `Sex`.
 Are both of these coefficients statistically significantly different from zero?
 
-Yes they are both statistically significant with $p < .05$.
+Yes they are both statistically significantly different from 0 with $p < .05$.
 
 How do you interpret the interaction term?
 
@@ -209,27 +209,61 @@ An experiment was conducted on three types of **material**: Plastic clay, Sandy 
 ### a) Fit the model (4 points)
 Create a linear model model predicting plastic deformation from moisture. Include material and the interaction between material and moisture. 
 
+
+```{r}
+clay = read.csv("clay_sample.csv")
+head(clay)
+unique(clay$ material)
+lm.clay = lm(clay$pd ~ clay$moisture * clay$material)
+summary(lm.clay)
+```
+
 a.i. Output the standard model summary using `summary()`. 
   
 a.ii. Interpret the $R^2$$ statistic value in one sentence.
 
+The model is able to capture ~88% of variance in the data.
+
 a.iii. Which material represents the baseline?
 
+The baseline is claystone. 
+
 a.iv. Explain how the residual standard error degrees of freedom is related to sample size and the model size.
+
+Residual standard error is the standard error of the models residuals. The formula for RSE is given by: 
+
+$$\sqrt{\frac{\sum_i^n{(y_i - \hat{y})^2}}{df}}$$
+The formula for df is given by $df = n - p - 1$, where $n$ is the sample size and $p$ is the model size. Then substitute back in the RSE formula:  
+
+$$\sqrt{\frac{\sum_i^n{(y_i - \hat{y})^2}}{n - p - 1}}$$
+
+At a glance, we can decrease the RSE by increasing the sample size or increasing model size (assuming this has no effect on the residuals).
 
 ### b) Interpret coefficient 1 (1 pt)
 Provide an interpretation for the value of the coefficient of moisture, and comment on its significance.
 
+If the material is claystone, then holding all other factors constant, a unit increase in moisture will lead to a 7.7928 increase in plastic deformation. This coefficient is statistically significant, with $p < .05$ and reject the null hypothesis the coefficient $= 0$.
+
 ### c) Interpret coefficient 2 (1 pt)
 Provide an interpretation for the value of the coefficient of one of the materials, and comment on its significance.
+
+If the material is plastic clay, then there will be a flat 23.9557 increase in plastic deformation compared to claystone. This coefficient is not statistically significant, with $p > .05$ so we accept the null hypothesis that this coefficient $= 0$.
 
 ### d) Interpret coefficient 3 (1 pt)
 Provide an interpretation for the value of the coefficient of one of the interaction terms, and comment on its significance.
 
+If the material is plastic clay, then the coefficient for moisture will decrease by -3.595 compared to claystone. This coefficient is statistically significant, with $p < .05$ and reject the null hypothesis the coefficient $= 0$.
+
 ### e) Assess assumptions (1 pt)
 Finally display the first two diagnostic plots using `plot(<YOUR MODEL>, which=1:2)` and discuss three of the assumptions of the linear model: normality of error term, linearity and the relationship, and constant variance of the error term. You do not have to do any more modeling after this step, but comment about what you *might* want to do to improve the model.
 
+```{r}
+plot(lm.clay, which=1:2)
+```
 
+There is a fanning out of residuals, indicating there is not constant variance of the error term. There also appears to be a nonlinear relationship in the data, indicated by the curved line in the 1st plot. It appears the error term is largely normally distributed by the QQ plot, except for the tails.
+
+To improve the model we might consider adding a nonlinear term in the classifier to capture the nonlinear patterns in the data. 
 
 ## Problem 4) Using Multiple regression to fit nonlinear data (8 points; 2 pt each)
 
@@ -242,6 +276,19 @@ First we will explore the relationship between $Y$ and the first two predictors 
 $$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon$$
 Interpret the coefficients of both X1 and X2. 
 
+```{r}
+mult_data = read.csv("multData.csv")
+lm.mult = lm(Y ~ X1 + X2, data = mult_data)
+summary(lm.mult)
+```
+
+All coefficients are significant with $p < .05$, i.e all coefficients $\neq 0$.
+
+For the intercept, With $X_1 = 0$ and $X_2 = 0$, $Y = 948.5316$. 
+
+Holding $X_2$ constant, a unit increase in $X_1$ will decrease $Y$ by $-12.6318$.
+
+Holding $X_1$ constant, a unit increase in $X_2$ will decrease $Y$ by $-35.1420$.
 
 ### b) Investigating interaction of quantitative predictors
 
@@ -250,20 +297,58 @@ $$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1\cdot X_2 + \epsilon$$
 
 Fit the model and view the summary output. Has this improved the model fit? Did anything surprising happen to the coefficients? Try to explain what happened.
 
+```{r}
+mult_data = read.csv("multData.csv")
+lm.mult = lm(Y ~ X1 * X2, data = mult_data)
+summary(lm.mult)
+```
 
+Has the model fit improved? In what way (Justify your answer)? 
 
+There seems to be a marginal improvement in RSE, $R^2$ and adjusted $R^2$. So it does seem the model improved fit.
+
+The intercept has become much smaller, and the coefficients for $X_1$ and $X_2$ are now positive. 
+
+Recall that the coefficient for the interaction term will change the coefficients for $X_1$ and $X_2$. Since the coefficient for the interaction term is negative, we no longer need negative coefficients for $X_1$ and $X_2$ because for large enough $X_1$ or $X_2$ the coefficient will become negative. This happens because the effect of one predictor depends on the other.
 
 ### c) Introducing the last predictor
 
 Next fit a model that introduces the `X3` variable. 
 
 $$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1\cdot X_2  + \beta_4 X_3 \epsilon$$
+
+```{r}
+mult_data = read.csv("multData.csv")
+lm.mult = lm(Y ~ X1 * X2 + X3, data = mult_data)
+summary(lm.mult)
+plot(lm.mult, which = 1:2)
+```
+
 Has the model fit improved? In what way (Justify your answer)? 
 
+Yes the model fit has improved in every way. It can explain nearly all the variance in the data and the residual standard error is around 9 times less than of previous models.
 
 ### d) Considering higher order terms
 
 Finally explore higher order terms for the X3 variable: Introduce $X3^2$, $X3^3$ etc and determine if any of these higher order terms are justified in the model. Explain your reasoning and present your final model. Look at the diagnostic plots and discuss whether the assumptions of the multiple regression model seem to be justified.
 
+```{r}
+mult_data = read.csv("multData.csv")
+X_3_pow = (mult_data$X3 ^ 2)
+lm.mult = lm(Y ~ X1 * X2 + X_3_pow, data = mult_data)
+summary(lm.mult)
+plot(lm.mult, which = 1:2)
+```
 
+For this model the residuals have zero mean and constant variance, but they are not normally distributed.
 
+```{r}
+X_3_pow = (mult_data$X3 ^ 3)
+lm.mult = lm(Y ~ X1 * X2 + X_3_pow, data = mult_data)
+summary(lm.mult)
+plot(lm.mult, which = 1:2)
+```
+
+For this model the residuals have zero mean and constant variance, but they are not normally distributed.
+
+It does not appear the assumptions of multiple regression are justified. The residuals are not normally distributed and we should not include this higher order term.
