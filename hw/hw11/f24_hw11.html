@@ -380,9 +380,15 @@ display: none;
 and the odds ratio of <span class="math inline">\(A\)</span> to <span class="math inline">\(B\)</span> is 1.3. Calculate the probability of
 event <span class="math inline">\(B\)</span>.</p>
 <hr />
-<p><span class="math display">\[1.3 = \frac{.8}{P(B)}\]</span></p>
-<pre class="r"><code>.8 / 1.3</code></pre>
-<pre><code>## [1] 0.6153846</code></pre>
+<p><span class="math display">\[1.3 = \frac{\frac{.8}{1 -
+.8}}{\frac{P(B)}{1 - P(B)}} = \frac{4}{\frac{P(B)}{1 -
+P(B)}}\]</span></p>
+<p><span class="math display">\[\frac{P(B)}{1 - P(B)} =
+\frac{4}{1.3}\]</span></p>
+<p><span class="math display">\[1.3P(B) = 4 - 4P(B)\]</span></p>
+<p><span class="math display">\[5.3P(B) = 4\]</span></p>
+<pre class="r"><code>4 / 5.3</code></pre>
+<pre><code>## [1] 0.754717</code></pre>
 <hr />
 </div>
 <div id="part-d" class="section level3">
@@ -400,7 +406,23 @@ divisible by 3?</p>
 What is <span class="math inline">\(Pr(A)\)</span>? *Hint: let <span class="math inline">\(Pr(A)=a\)</span> and <span class="math inline">\(Pr(B)=b\)</span>, and write out the odds ratio and
 risk ratio as equations.</p>
 <hr />
-<p><span class="math display">\[\frac{P(A)}{P(B)} = 3\]</span></p>
+<p><span class="math display">\[\frac{a}{b} = 3\]</span></p>
+<p><span class="math display">\[\frac{\frac{a}{1 - a}}{\frac{b}{1 - b}}
+= 9\]</span></p>
+<p><span class="math display">\[3b = a\]</span></p>
+<p><span class="math display">\[\frac{\frac{3b}{1 - 3b}}{\frac{b}{1 -
+b}} = 9\]</span></p>
+<p><span class="math display">\[\frac{3b}{1 - 3b} = \frac{9b}{1 -
+b}\]</span></p>
+<p><span class="math display">\[\frac{b}{1 - 3b} = \frac{3b}{1 -
+b}\]</span></p>
+<p><span class="math display">\[b - b^2 = 3b - 9b^2\]</span></p>
+<p><span class="math display">\[1 - b = 3 - 9b\]</span></p>
+<p><span class="math display">\[ 8b = 2\]</span></p>
+<p><span class="math display">\[b = \frac{1}{4}\text{, }a =
+\frac{3}{4}\]</span></p>
+<p><span class="math display">\[P(B) = \frac{1}{4}\text{, }P(A) =
+\frac{3}{4}\]</span></p>
 <hr />
 </div>
 </div>
@@ -444,6 +466,10 @@ how many hours of study are needed so that the predicted probability of
 an A is <span class="math inline">\(50\%\)</span>? If you aren’t up for
 the math, feel free to find an approximate solution via guess-and-check
 in R.</p>
+<p><span class="math display">\[log(1) = -5 + .06 * x_1 + 1.1 *
+3.5\]</span></p>
+<pre class="r"><code>(5 - 1.1 * 3.5) / .06</code></pre>
+<pre><code>## [1] 19.16667</code></pre>
 </div>
 </div>
 <div id="problem-3.-palmer-penguins-part-1-9pts-3-pts-each" class="section level2">
@@ -491,7 +517,6 @@ table(penguins$Adelie, penguins$island)</code></pre>
 ##     Biscoe Dream Torgersen
 ##   0    124    68         0
 ##   1     44    56        52</code></pre>
-<pre class="r"><code>#prop.table(table(penguins$island, penguins$Adelie))</code></pre>
 <p>For Biscoe <span class="math inline">\(\frac{44}{168}\)</span> were
 Adelie.</p>
 <p>For Dream <span class="math inline">\(\frac{56}{56 + 68}\)</span>
@@ -631,7 +656,8 @@ summary(model)</code></pre>
 ## AIC: 32.84
 ## 
 ## Number of Fisher Scoring iterations: 11</code></pre>
-<p>All predictors except bill_depth_mm are significant, with <span class="math inline">\(p&lt; .05\)</span>.</p>
+<p>All predictors except bill_depth_mm and flipper_length_mm are
+significant, with <span class="math inline">\(p&lt; .05\)</span>.</p>
 </div>
 <div id="d-assessing-the-model" class="section level3">
 <h3>d) Assessing the model</h3>
